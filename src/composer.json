@@ -1,0 +1,21 @@
+{
+    "name": "piyook/chemsymb",
+    "description": "converts string of unformatted chem formula to html formatted string",
+    "type": "project",
+    "require": {
+        "composer/composer": "^2.0",
+        "phpunit/phpunit": "^9.5"
+    },
+    "authors": [
+        {
+            "name": "piyook",
+            "email": "piyook@piyook.com"
+        }
+    ],
+
+    "autoload":{
+        "psr-4":{
+            "App\\":"app"
+        }
+    }
+}

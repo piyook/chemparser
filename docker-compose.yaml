@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+    server:
+        build:
+            context: .
+            dockerfile: dockerfiles/apache2.dockerfile
+        ports:
+            - '8000:80'
+        volumes:
+            - ./src:/var/www/html
+    
+    composer:
+        image: composer:latest
+        working_dir: /src
+        volumes:
+            - ./src:/src
