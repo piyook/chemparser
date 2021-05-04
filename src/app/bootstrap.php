@@ -1,12 +1,8 @@
 <?php
 
-// use App\ChemSymb\ChemParser;
-
-use App\ChemSymb\ParserController;
+use App\ChemSymb\ChemParser;
 
 require __DIR__.'/../vendor/autoload.php';
 
-// $ChemParser = new ChemParser;
-
-$ParserController = new ParserController;
+$ChemParser = new ChemParser;
 

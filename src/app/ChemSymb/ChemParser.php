@@ -4,6 +4,9 @@ namespace App\ChemSymb;
 
 use App\ChemSymb\AbstractTests;
 
+/**
+ * Converts A String with unformatted Molecular or Empirical Chemical Fromulae into formatted HTML.
+ */
 class ChemParser extends AbstractTests{
 
     public array $periodic_table;
@@ -22,33 +25,53 @@ class ChemParser extends AbstractTests{
         ]; 
         
     }
+    
+    /**
+     * Parses a String with unformatted Molecular or Empirical Chemical Fromulae into formatted HTML.
+     *
+     * @param  mixed $string
+     * @return string
+     */
+    public function parse(string $string) : string {
 
+        $formulaArray = $this->analyse(strval(trim($string)));
+    
+        return $this->HTMLFormat($formulaArray);
 
-    public function analyse($string){
-
-        preg_match_all('/[A-Za-z0-9+-.<=>()\s\[\]]/', $string, $matches);
-
-        array_unshift($matches[0], "^");
-        $matches[0][] = "$";
-
-        // return $matches[0];
-
-        return $this->matchElements($matches[0]);
     }
+    
+    /**
+     * Extracts allowed characters into an Array
+     *
+     * @param  mixed $string
+     * @return array
+     */
+    protected function analyse($string){
 
-    protected function matchElements($formulaString){
+        $formula_array = $this->extract_allowed_characters_to_array($string);
+
+        return $this->extractElements($formula_array);
+    }
+    
+    /**
+     * Extracts Elements and allowed characters from an array and places them in new array
+     *
+     * @param  mixed $formulaArray
+     * @return array
+     */
+    protected function extractElements($formulaArray){
 
         $resultsArray = array();
 
-        foreach($formulaString as $index => $letter) {
+        foreach($formulaArray as $index => $letter) {
 
-            if (preg_match('/[0-9+-.<=>qsg()^$\s\[\]n]/', $letter) ) {
+            if ($this->check_if_non_element_character_is_allowed($letter)) {
                 $resultsArray[]=$letter;
                 continue;
             }
 
-            if (preg_match('/[(al)]/', $letter) ) {
-                if ($formulaString[$index-1]==='('){
+            if ($this->check_if_element_character_is_part_of_state_symbol($letter) ) {
+                if ($formulaArray[$index-1]==='('){
                 $resultsArray[]=$letter;
                 }
                 continue;
@@ -56,10 +79,10 @@ class ChemParser extends AbstractTests{
             
             if (ctype_upper($letter)){
 
-                    if (ctype_lower($formulaString[$index+1]) && $formulaString[$index+1] != 'n'){
+                    if ($this->check_if_two_letter_element_character($index, $formulaArray)){
 
-                            if ($this->check_is_element($letter.$formulaString[$index+1]))
-                            {$resultsArray[] = $letter.$formulaString[$index+1];
+                            if ($this->check_is_element($letter.$formulaArray[$index+1]))
+                            {$resultsArray[] = $letter.$formulaArray[$index+1];
                             }
                         
                     } else {
@@ -74,14 +97,26 @@ class ChemParser extends AbstractTests{
         return $resultsArray;
         
     }
-
+    
+    /**
+     * Checks character or characters are an element in the periodic table
+     *
+     * @param  mixed $element
+     * @return void
+     */
     protected function check_is_element($element){
 
         return in_array($element, $this->periodic_table);
         
     }
-
-    public function HTMLformat($formulaArray){
+    
+    /**
+     * Converts a string containing a chemical formula into a formatted HTML String
+     *
+     * @param  mixed $formulaArray
+     * @return string
+     */
+    protected function HTMLformat($formulaArray){
 
         foreach ($formulaArray as $index=>$element) {
 
@@ -116,7 +151,7 @@ class ChemParser extends AbstractTests{
                             break;
                     
                         // (aq),(g),(l) ..
-                        case $this->check_if_bracket_is_a_state_or_just_a_bracket($element):  
+                        case $this->check_if_bracket_is_present($element):  
                             
                               $number_to_null=0;
 
@@ -171,8 +206,14 @@ class ChemParser extends AbstractTests{
             return $this->cleanUp($formulaArray);
     }
 
-
-protected function cleanUp($formulaArray) {
+    
+    /**
+     * Deletes start '^' and end '$' characters that are used for processing the array
+     *
+     * @param  mixed $formulaArray
+     * @return void
+     */
+    protected function cleanUp($formulaArray) {
 
         $formulaArray[0]='';
         $formulaArray[count($formulaArray)-1]='';
@@ -182,51 +223,67 @@ protected function cleanUp($formulaArray) {
         
         return $result;
 
-}
-
-protected function bracketFormulaCheck($formulaArray, $index){
-
-    $arrayLength = count($formulaArray)-1;
-    $flag = 0;
-    $startPos = $index;
-    $endPos = $index;
-    $returnString="<sub>";
-
-    //work out whether bracket is of type(2n+1)
-
-    while (($formulaArray[$index] != ')' && ($index <= $arrayLength))){
-        if ($formulaArray[$index] === 'n'){
-
-            $flag=1;
-        }
-        $index++;
-        $endPos++;
-        
     }
-    // if it is and flag have a value then create a new string to be subbed
-    if ($flag){
+    
+    /**
+     * checks if the bracket in the fomula is part of a state, part of a (2n+1) type or just a normal bracket
+     *
+     * @param  mixed $formulaArray
+     * @param  mixed $index
+     * @return void
+     */
+    protected function bracketFormulaCheck($formulaArray, $index){
 
-            for ($x=$startPos;$x<=$endPos;$x++){
-                
-            $returnString .= $formulaArray[$x];
-            $formulaArray[$x]='';
+        $arrayLength = count($formulaArray)-1;
+        $flag = 0;
+        $startPos = $index;
+        $endPos = $index;
+        $returnString="<sub>";
+
+
+        while (($formulaArray[$index] != ')' && ($index <= $arrayLength))){
+            if ($formulaArray[$index] === 'n'){
+
+                $flag=1;
             }
-            $returnString .="</sub>";
+            $index++;
+            $endPos++;
+            
+        }
+        
+        if ($flag){
 
+                for ($x=$startPos;$x<=$endPos;$x++){
+                    
+                $returnString .= $formulaArray[$x];
+                $formulaArray[$x]='';
+                }
+                $returnString .="</sub>";
+
+        }
+
+        if ($flag) {
+            return [$returnString, $endPos-$startPos];
+        
+        } else { return false; }
     }
 
-    if ($flag) {
-        return [$returnString, $endPos-$startPos];
-      
-    } else { return false; }
-}
-
+/**
+ * Deletes obsolete characters in an array due to combination e.g '(','a','q',')' to '(aq)'
+     * '(' becomes '(aq)' and 'a','q',')' need to be removed
+ *
+ * @param  mixed $index
+ * @param  mixed $formulaArray
+ * @param  mixed $number_to_null
+ * @return void
+ */
 protected function set_obsolete_array_items_to_null($index, $formulaArray,  $number_to_null){
 
     for ($x=1; $x <=   $number_to_null; $x++){
         $formulaArray[$index+$x]='';
        }
-       return $formulaArray;
+    
+    return $formulaArray;
 }
 
 
