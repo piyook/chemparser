@@ -25,6 +25,14 @@ class ChemParser extends AbstractTests{
         ]; 
         
     }
+
+    public function __invoke(string $string) : string {
+
+        $formulaArray = $this->analyse(strval(trim($string)));
+    
+        return $this->HTMLFormat($formulaArray);
+
+    }
     
     /**
      * Parses a String with unformatted Molecular or Empirical Chemical Fromulae into formatted HTML.

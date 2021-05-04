@@ -44,5 +44,9 @@ require __DIR__.'/../app/bootstrap.php';
 <p> Test string is:  [Fe(H2O)6]3+ </p>
 <p> Formatted String is : <b> <?php echo $ChemParser->parse('[Fe(H2O)6]3+'); ?> </b></p>
 <br>
+
+<p> Test string is:  CuSO4(s) <=> Cu2+(aq) SO42-(aq) </p>
+<p> Formatted String is : <b> <?php echo $ChemParser('CuSO4(s) <=> Cu2+(aq) SO4 2- (aq)'); ?> </b></p>
+<br>
 </body>
 </html>

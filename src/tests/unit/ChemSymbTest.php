@@ -116,6 +116,18 @@ class ChemSymbTest extends \PHPUnit\Framework\TestCase
 
      }
 
+     /** @test */
+     public function check_class_can_be_called_as_method(){
+
+      $parser = new ChemParser;
+      $input = "CnH(2n+1)OH";
+      $return_string = $parser($input);
+  
+      $this->assertStringContainsString("<sub>n</sub>", $return_string);
+      $this->assertStringContainsString("<sub>(2n+1)</sub>", $return_string);
+
+   }
+
      
 
     

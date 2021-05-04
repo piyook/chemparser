@@ -106,7 +106,16 @@ The parse method returns an html string.
   <p> Formatted String is : <b> <?php echo $ChemParser->parse('nC6H12O6 => (CH10O5)n + nH2O'); ?> </b></p>
   ``` 
 
+  You can also call the parse method directly on the class (using the __invoke magic method) by passing the string directly to the class E.g $ChemParser('string');
+
+  ```sh
+  <p> Test string is:  CuSO4(s) <=> Cu2+ SO42- </p>
+ <p> Formatted String is : <b> <?php echo $ChemParser('CuSO4(s) <=> Cu2+ SO4 2-'); ?> </b></p>
+  ``` 
+
 The string can be displayed on-screen as is or further styled with css/sass.
+
+IMPORTANT: Input formulas as simple text strings - BUT if numbers and ions are together then seperate with a space E.g SO42-(aq) should be input as SO4 2- (aq).The parser will then correctly format and remove the space.
 
 ## Contact
 
